@@ -18,6 +18,16 @@ defmodule Parser do
     end
   end
 
+  def parse_guarded(newly_constructed, last_group, constructed, tokens) do
+    if last_group == "" do
+      parse(constructed ++ [newly_constructed], "", tokens)
+    else
+      parse(constructed ++ [{:token, last_group}, newly_constructed], "", tokens)
+    end
+  end
+
+
+
   def parse(constructed, last_group, token) when length(token) <= 1 do
     case token do
       [token] ->
@@ -33,11 +43,11 @@ defmodule Parser do
       "!" when last_group != "" ->
         parse(constructed ++ [{:macro_invocation, last_group}], "", tokens)
 
-      "{" -> parse_guarded(:lbrace, constructed, tokens)
-      "}" -> parse_guarded(:rbrace, constructed, tokens)
+      "{" -> parse_guarded(:lbrace, last_group, constructed, tokens)
+      "}" -> parse_guarded(:rbrace, last_group, constructed, tokens)
 
-      "[" -> parse_guarded(:lbrack, constructed, tokens)
-      "]" -> parse_guarded(:rbrack, constructed, tokens)
+      "[" -> parse_guarded(:lbrack, last_group, constructed, tokens)
+      "]" -> parse_guarded(:rbrack, last_group, constructed, tokens)
 
       x ->
         if String.trim(x) == "" do
@@ -55,7 +65,6 @@ defmodule Parser do
 
   @impl true
   def handle_call({:parse, path}, _from, state) do
-    IO.inspect(state)
     {:ok, document} = File.read(path)
 
     parsed = document |> String.codepoints() |> parse

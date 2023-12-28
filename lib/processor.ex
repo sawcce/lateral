@@ -24,6 +24,9 @@ defmodule Processor do
         " " <>
         case token do
           {:token, token} -> token
+          :lparen -> "("
+          :rparen -> ")"
+
           :lbrace -> "{"
           :rbrace -> "}"
           :lbrack -> "["

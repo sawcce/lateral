@@ -43,6 +43,9 @@ defmodule Parser do
       "!" when last_group != "" ->
         parse(constructed ++ [{:macro_invocation, last_group}], "", tokens)
 
+      "(" -> parse_guarded(:lparen, last_group, constructed, tokens)
+      ")" -> parse_guarded(:rparen, last_group, constructed, tokens)
+
       "{" -> parse_guarded(:lbrace, last_group, constructed, tokens)
       "}" -> parse_guarded(:rbrace, last_group, constructed, tokens)
 

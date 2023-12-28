@@ -1,21 +1,26 @@
 # Lateral
 
-**TODO: Add description**
+Lateral is a macro-preprocessor aiming to be extensible and easy to use.
+While mainly made to be compiled to tex/LaTeX documents, you can use it to your liking.
 
-## Installation
+## Syntax
+Macros are invoked with a bang (!) as such:   
+```
+use! defaults
+```
+Anything else is parsed as a token:  
+```
+Hello, world !
+```
+Will yield a list of the following tokens: `["Hello,", "world", "!"]`
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `lateral` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:lateral, "~> 0.1.0"}
-  ]
-end
+## Semantics
+A macro can consume any tokens behind or after its invocation.  
+Let's imagine a macro, `frac!` that consumes one token before and one after its invocation.
+```
+a frac! b hello, world c frac! d
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/lateral>.
-
+Here, the first invocation will consume both a and b, the second c and d, "hello, world" will be yield as a text node as it hasn't been consumed.  
+But, what if I wanted to consume a group of tokens rather than tokens individually?  
+To do that you can do whatever you want to define a group of tokens, but, beware only: `()[]{}`  are recognized as separate tokens. Hence, you could make your macro parse what we'd call an atom: `(n fact!) frac! { (n-k) fact! n fact! }`. They are purely conventions and you are free to use any kind of delimiter.

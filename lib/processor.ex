@@ -18,16 +18,22 @@ defmodule Processor do
     end
   end
 
-  def process(generated, previous, tokens) when not is_list(tokens) do
-    {generated, previous}
+  def reduce(text) do
+    Enum.reduce(text, "", fn token, acc ->
+      acc <>
+        " " <>
+        case token do
+          {:token, token} -> token
+          :lbrace -> "{"
+          :rbrace -> "}"
+          :lbrack -> "["
+          :rbrack -> "]"
+        end
+    end)
   end
 
   def process(generated, previous, []) do
-    {generated, previous}
-  end
-
-  def process(generated, previous, [last]) do
-    {generated, previous ++ [last]}
+    generated ++ [{:text, reduce(previous)}]
   end
 
   def process(generated, previous, [first_token | tokens]) do
@@ -35,18 +41,7 @@ defmodule Processor do
       {:macro_invocation, macro} ->
         {newly_generated, previous, tokens} = macro_invocation(macro, previous, tokens)
 
-        reduced_text =
-          Enum.reduce(previous, "", fn token, acc ->
-            acc <>
-              " " <>
-              case token do
-                {:token, token} -> token
-                :lbrace -> "{"
-                :rbrace -> "}"
-                :lbrack -> "["
-                :rbrack -> "]"
-              end
-          end)
+        reduced_text = reduce(previous)
 
         process(
           generated ++
@@ -68,6 +63,10 @@ defmodule Processor do
 end
 
 defmodule Processor.Utils do
+  def process(tokens) do
+    Processor.process([], [], tokens)
+  end
+
   def parse_atom_forward(tokens) do
     next = List.first(tokens)
 
